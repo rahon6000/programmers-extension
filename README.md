@@ -1,6 +1,7 @@
-# programmers-extension README
+# programmers-extension
 
-This is the README for your extension "programmers-extension". After writing up a brief description, we recommend including the following sections.
+VScode extension for easy import&export for Programmers code test.
+
 
 ## Features
 

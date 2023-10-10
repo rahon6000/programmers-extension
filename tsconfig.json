@@ -4,10 +4,14 @@
 		"target": "ES2020",
 		"outDir": "out",
 		"lib": [
-			"ES2020"
+			"ES2020",
+			"DOM",
+			"ES2021.String"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
+		// "allowImportingTsExtensions": true,
+		// "noEmit": true,
 		"strict": true   /* enable all strict type-checking options */
 		/* Additional Checks */
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
