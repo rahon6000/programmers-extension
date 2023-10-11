@@ -18,16 +18,26 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable1 = vscode.commands.registerCommand('programmers-extension.helloWorld', () => {
-		let mainSection: String[] = ["<h5>입출력 예</h5>"];
-		let problem: Problem = extractTC(mainSection);
-		printIt("done");
+	let disposableExport = vscode.commands.registerCommand('programmers-extension.export', () => {
+		try {
+			let editorTexts = "hello";
+			let editor: vscode.TextEditor|undefined = vscode.window.activeTextEditor;
+			if (editor === undefined) {throw Error("No active text editor");}
+			let doc: vscode.TextDocument = editor.document;
+			let userLang = doc.languageId;			
+			vscode.env.clipboard.writeText(codeToClipboard(doc.getText(), userLang));
+			printIt("📎클립보드📎에 복사 완료~ ☘");
+			
+		} catch (error) {
+			printIt("cannot copy solution");
+		}
+		
 	});
-	context.subscriptions.push(disposable1);
+	context.subscriptions.push(disposableExport);
 	
 
 
-	let disposable = vscode.commands.registerCommand('programmers-extension.import', async ( ) => {
+	let disposableImport = vscode.commands.registerCommand('programmers-extension.import', async ( ) => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 
@@ -35,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 			placeHolder:	"URL of problem...",
 			prompt: "URL 입력 ex) https://school.programmers.co.kr/learn/courses/30/lessons/68645",
 			value: ""
-		})
+		});
 		if (urlQuery === undefined) {return;}
 
 		let htmlContext = "";
@@ -43,7 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
 		ax.get(urlQuery,
 			{
 				headers : {
-					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.55 VScodeProgrammersextension/1.0"
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.55 VScodeProgrammersExtension/0.0.0"
 				}
 			})
 			.then(function (response){
@@ -54,15 +65,16 @@ export function activate(context: vscode.ExtensionContext) {
 					let problem:Problem = extractTC(mainSection);
 	
 					// 에디터가 undefined 일 때의 예외 처리 해 줘야 한다.
-					const editor: vscode.TextEditor = vscode.window.activeTextEditor as vscode.TextEditor;
-					const doc: vscode.TextDocument = editor?.document;
-					const selection = editor?.selection;
+					let editor: vscode.TextEditor|undefined = vscode.window.activeTextEditor;
+					if (editor === undefined) {throw Error("No active text editor");}
+					let doc: vscode.TextDocument = editor.document;
 	
 					// check language.
 					let userLang = doc.languageId;
 	
 					// insert context!
-					editor?.edit(editBuilder => {
+					editor.edit(editBuilder => {
+						editBuilder.delete(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(doc.lineCount, 0)));
 						let generatedCode = buildCode(problem, userLang);
 						// editBuilder.insert( doc.positionAt(0), generatedCode);
 						editBuilder.insert( doc.positionAt(0), generatedCode);
@@ -82,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposableImport);
 }
 // This method is called when your extension is deactivated
 export function deactivate() {}
@@ -178,7 +190,6 @@ function buildCode(problem: Problem, language: string): string {
 	switch (language) {
 		case "java":
 		codeResult = lang.javaCodeBuilder(problem, language);
-
 			return codeResult;
 		case "python":
 			//python
@@ -189,9 +200,27 @@ function buildCode(problem: Problem, language: string): string {
 		default:
 			codeResult = "error!";
 			return codeResult;
-	}
-	
+	}	
 }
+
+function codeToClipboard(str: string, language: string) {
+	let codeResult = "";
+	switch (language) {
+		case "java":
+		codeResult = lang.javaCodeExporter(str);
+			return codeResult;
+		case "python":
+			//python
+			return codeResult;
+		case "customLang":
+			//customLang
+			return codeResult;
+		default:
+			codeResult = "error!";
+			return codeResult;
+	}	
+}
+
 function removeTag(str: string): string {
 	let locS = str.search(">");
 	if(locS === -1) {return str;}

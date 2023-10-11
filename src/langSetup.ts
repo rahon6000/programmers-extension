@@ -85,6 +85,32 @@ const javaCodeBuilder = (problem: Problem, language: string): string => {
     return result;
 };
 
+const javaCodeExporter = (str: string ): string => {
+    // find "public static void main"
+    // find { } closing position using stack
+    let mainMethodS = str.search("public static void main(");
+    let afterMainMethod = str.substring(mainMethodS);
+    let mainMethodE = 0;
+    let stack = 0;
+    for(let i = 0; i < afterMainMethod.length; i++){
+        let charbuffer = afterMainMethod.charAt(i);
+        if(charbuffer === "{"){
+            stack ++;
+        } else if(charbuffer === "}") {
+            stack --;
+            if (stack === 0) {
+                mainMethodE = mainMethodS + i;
+                break;
+            }
+        }
+    }
+    // get substrings
+    let firstPartOfString = str.substring(0, mainMethodS);
+    let secondPartOfString = str.substring(mainMethodE+1);
+
+    return firstPartOfString + secondPartOfString;
+};
+
 function getJavaType(str: string): string {
     let dimension = 0;
     let typeStr = "";
@@ -137,5 +163,6 @@ function getDimension(answer: string): number {
     return result;
 }
 
-export { javaCodeBuilder };
+
+export { javaCodeBuilder, javaCodeExporter };
 

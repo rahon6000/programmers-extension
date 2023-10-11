@@ -1,6 +1,6 @@
 {
   "name": "programmers-extension",
-  "displayName": "Programmers_extension",
+  "displayName": "Programmers Extension",
   "description": "VScode extension for easy import&export for Programmers code test.",
   "version": "0.0.1",
   "engines": {
