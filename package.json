@@ -2,6 +2,7 @@
   "name": "programmers-extension",
   "displayName": "Programmers Extension",
   "description": "VScode extension for easy import&export for Programmers code test.",
+  "icon": "resources/icon.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.83.0"
