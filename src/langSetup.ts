@@ -1,6 +1,6 @@
 import { Problem } from "./extension";
 
-const javaCodeBuilder = (problem: Problem, language: string): string => {
+const javaCodeBuilder = (problem: Problem): string => {
     let result: string = "";
 
     let tcCases = "";
@@ -18,7 +18,7 @@ const javaCodeBuilder = (problem: Problem, language: string): string => {
 
         } else {
             if (Math.floor(i / problem.tcHeader.length) > 0) { tcCases += "\t\t//"; } // comment out
-            else { tcCases += "\t\t" }
+            else { tcCases += "\t\t";}
             tcCases += (getJavaType(problem.tcCase[i]) + " ");
             tcCases += (problem.tcHeader[i % problem.tcHeader.length] + " = ");
             tcCases += (convertToJavaStyle(problem.tcCase[i]) + ";");
@@ -34,11 +34,10 @@ const javaCodeBuilder = (problem: Problem, language: string): string => {
         } else { inputTypes += ", "; }
     }
 
-    // iterate output if output type is array (정신 나갈 것 같애~)
+    // iterate output if output type is array
     outputDimension = getDimension(problem.tcCase[problem.tcHeader.length - 1]);
     if (outputDimension > 0) {
         // for loop starts
-        for (let i = 0; i < outputDimension; i++) { outputType += "[]"; }
         outputIter +=
             `System.out.print("[");
         for( `+ outputType.split("[")[0] + ` i : output ){\n`;
@@ -85,19 +84,19 @@ const javaCodeBuilder = (problem: Problem, language: string): string => {
     return result;
 };
 
-const javaCodeExporter = (str: string ): string => {
+const javaCodeExporter = (str: string): string => {
     // find "public static void main"
     // find { } closing position using stack
-    let mainMethodS = str.search("public static void main(");
+    let mainMethodS = str.search("public static void main");
     let afterMainMethod = str.substring(mainMethodS);
     let mainMethodE = 0;
     let stack = 0;
-    for(let i = 0; i < afterMainMethod.length; i++){
+    for (let i = 0; i < afterMainMethod.length; i++) {
         let charbuffer = afterMainMethod.charAt(i);
-        if(charbuffer === "{"){
-            stack ++;
-        } else if(charbuffer === "}") {
-            stack --;
+        if (charbuffer === "{") {
+            stack++;
+        } else if (charbuffer === "}") {
+            stack--;
             if (stack === 0) {
                 mainMethodE = mainMethodS + i;
                 break;
@@ -106,7 +105,7 @@ const javaCodeExporter = (str: string ): string => {
     }
     // get substrings
     let firstPartOfString = str.substring(0, mainMethodS);
-    let secondPartOfString = str.substring(mainMethodE+1);
+    let secondPartOfString = str.substring(mainMethodE + 1);
 
     return firstPartOfString + secondPartOfString;
 };
@@ -165,4 +164,152 @@ function getDimension(answer: string): number {
 
 
 export { javaCodeBuilder, javaCodeExporter };
+
+const pythonCodeBuilder = (problem: Problem): string => {
+
+    let result: string = "";
+
+    let tcCases = "";
+    let inputTypes = "";
+
+    // generate elements...
+
+    // TC cases generate
+    for (let i = 0; i < problem.tcCase.length; i++) {
+        if (i % problem.tcHeader.length === problem.tcHeader.length - 1) {
+
+        } else {
+            if (Math.floor(i / problem.tcHeader.length) > 0) { tcCases += "#"; } // comment out
+            tcCases += problem.tcHeader[i % problem.tcHeader.length] + " = ";
+            tcCases += problem.tcCase[i];
+            tcCases += "\t\t#TC no." + Math.floor(i / problem.tcHeader.length + 1) + "\n";
+        }
+    }
+
+    // TC type (from table column names) generate
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        if (i === problem.tcHeader.length - 2) {
+            break;
+        } else { inputTypes += ", "; }
+    }
+    result +=
+`\n\n# main start!\n\n`;
+
+    result += tcCases;
+    result +=
+        `print(solution(`;
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        result += problem.tcHeader[i];
+        if (i === problem.tcHeader.length - 2) { break; }
+        else { result += ", "; }
+    }
+    result +=
+        `)) \n\n# main end!\n\n`;
+
+    result += `def solution(`;
+
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        result += problem.tcHeader[i];
+        if (i === problem.tcHeader.length - 2) { break; }
+        else { result += ", "; }
+    }
+    result +=
+        `):
+    answer = 0
+    return answer`;
+
+    return result;
+};
+
+const pythonCodeExporter = (str: string): string => {
+    // find "\n# main start!"
+    // find "\n# main end!"
+    let mainMethodS = str.search("\n# main start!");
+    if(mainMethodS === -1 ) {throw Error("'main start' anchor not found.");}
+    let mainMethodE = str.search("\n# main end!");
+    if(mainMethodE === -1 ) {throw Error("'main end' anchor not found.");}
+
+    // get substrings
+    let firstPartOfString = str.substring(0, mainMethodS);
+    let secondPartOfString = str.substring(mainMethodE + "\n#main end!".length + 1);
+
+    return firstPartOfString + secondPartOfString;
+};
+
+export { pythonCodeBuilder, pythonCodeExporter };
+
+
+const javascriptCodeBuilder = (problem: Problem): string => {
+
+    let result: string = "";
+
+    let tcCases = "";
+    let inputTypes = "";
+
+    // generate elements...
+
+    // TC cases generate
+    for (let i = 0; i < problem.tcCase.length; i++) {
+        if (i % problem.tcHeader.length === problem.tcHeader.length - 1) {
+
+        } else {
+            if (Math.floor(i / problem.tcHeader.length) > 0) { tcCases += "// "; } // comment out
+            tcCases += problem.tcHeader[i % problem.tcHeader.length] + " = ";
+            tcCases += problem.tcCase[i];
+            tcCases += ";\t\t// TC no." + Math.floor(i / problem.tcHeader.length + 1) + "\n";
+        }
+    }
+
+    // TC type (from table column names) generate
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        if (i === problem.tcHeader.length - 2) {
+            break;
+        } else { inputTypes += ", "; }
+    }
+    result +=
+`\n\n// main start!\n\n`;
+
+    result += tcCases;
+    result +=
+`console.log(solution(`;
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        result += problem.tcHeader[i];
+        if (i === problem.tcHeader.length - 2) { break; }
+        else { result += ", "; }
+    }
+    result +=
+        `)) \n\n// main end!\n\n`;
+
+    result += `function solution(`;
+
+    for (let i = 0; i < problem.tcHeader.length - 1; i++) {
+        result += problem.tcHeader[i];
+        if (i === problem.tcHeader.length - 2) { break; }
+        else { result += ", "; }
+    }
+    result +=
+        `){
+    var answer = 0;
+    return answer;\n}`;
+
+    return result;
+};
+
+const javascriptCodeExporter = (str: string): string => {
+    // find "\n# main start!"
+    // find "\n# main end!"
+    let mainMethodS = str.search("\n# main start!");
+    if(mainMethodS === -1 ) {throw Error("'main start' anchor not found.");}
+    let mainMethodE = str.search("\n# main end!");
+    if(mainMethodE === -1 ) {throw Error("'main end' anchor not found.");}
+
+    // get substrings
+    let firstPartOfString = str.substring(0, mainMethodS);
+    let secondPartOfString = str.substring(mainMethodE + "\n#main end!".length + 1);
+
+    return firstPartOfString + secondPartOfString;
+};
+
+export { javascriptCodeBuilder, javascriptCodeExporter };
+
 

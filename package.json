@@ -3,7 +3,12 @@
   "displayName": "Programmers Extension",
   "description": "VScode extension for easy import&export for Programmers code test.",
   "icon": "resources/icon.png",
-  "version": "0.0.1",
+  "author": {
+    "name": "Taekhyeon Lee",
+    "email": "rahon6000@gmail.com",
+    "url": "https://blog.rahon.dev"
+  },
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.83.0"
   },
@@ -46,5 +51,10 @@
   },
   "dependencies": {
     "axios": "^1.5.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rahon6000/Programmers-extension"
+  },
+  "homepage": "https://github.com/rahon6000/Programmers-extension"
 }

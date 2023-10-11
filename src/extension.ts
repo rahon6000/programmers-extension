@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as lang from './langSetup';
-import { error } from 'console';
 
 let title: string;
 
@@ -21,75 +20,82 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableExport = vscode.commands.registerCommand('programmers-extension.export', () => {
 		try {
 			let editorTexts = "hello";
-			let editor: vscode.TextEditor|undefined = vscode.window.activeTextEditor;
-			if (editor === undefined) {throw Error("No active text editor");}
+			let editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+			if (editor === undefined) { throw Error("No active text editor"); }
 			let doc: vscode.TextDocument = editor.document;
-			let userLang = doc.languageId;			
+			let userLang = doc.languageId;
 			vscode.env.clipboard.writeText(codeToClipboard(doc.getText(), userLang));
 			printIt("📎클립보드📎에 복사 완료~ ☘");
-			
+
 		} catch (error) {
 			printIt("cannot copy solution");
 		}
-		
+
 	});
 	context.subscriptions.push(disposableExport);
-	
 
 
-	let disposableImport = vscode.commands.registerCommand('programmers-extension.import', async ( ) => {
+
+	let disposableImport = vscode.commands.registerCommand('programmers-extension.import', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 
 		const urlQuery = await vscode.window.showInputBox({
-			placeHolder:	"URL of problem...",
+			placeHolder: "URL of problem...",
 			prompt: "URL 입력 ex) https://school.programmers.co.kr/learn/courses/30/lessons/68645",
 			value: ""
 		});
-		if (urlQuery === undefined) {return;}
+		if (urlQuery === undefined) { return; }
+		if (urlQuery.search("https://school.programmers.co.kr/learn") !== 0 ) {
+			printIt("url 을 확인해 주세요.");
+			return;
+		}
 
 		let htmlContext = "";
 		const ax = axios;
 		ax.get(urlQuery,
 			{
-				headers : {
+				headers: {
 					// eslint-disable-next-line @typescript-eslint/naming-convention
 					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.55 VScodeProgrammersExtension/0.0.0"
 				}
 			})
-			.then(function (response){
+			.then(function (response) {
 				try {
 					// success
 					htmlContext = response.data;
 					let mainSection = [getMainSection(htmlContext)];
-					let problem:Problem = extractTC(mainSection);
-	
+					let problem: Problem = extractTC(mainSection);
+
 					// 에디터가 undefined 일 때의 예외 처리 해 줘야 한다.
-					let editor: vscode.TextEditor|undefined = vscode.window.activeTextEditor;
-					if (editor === undefined) {throw Error("No active text editor");}
+					let editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+					if (editor === undefined) { throw Error("No active text editor"); }
 					let doc: vscode.TextDocument = editor.document;
-	
+
 					// check language.
 					let userLang = doc.languageId;
-	
+
 					// insert context!
 					editor.edit(editBuilder => {
 						editBuilder.delete(new vscode.Range(new vscode.Position(0, 0), new vscode.Position(doc.lineCount, 0)));
 						let generatedCode = buildCode(problem, userLang);
 						// editBuilder.insert( doc.positionAt(0), generatedCode);
-						editBuilder.insert( doc.positionAt(0), generatedCode);
+						editBuilder.insert(doc.positionAt(0), generatedCode);
 					});
-					
-					printIt("프로그래머스 문제 **" + problem.title +"** 로딩 완료~🤟");
+
+					printIt("프로그래머스 문제 **" + problem.title + "** 로딩 완료~🤟");
+					return;
 				} catch (error) {
 					printIt("파싱 실패");
+					return;
 				}
 			})
-			.catch(function (error){
+			.catch(function (error) {
 				// fail
 				printIt("통신 실패");
+				return;
 			})
-			.finally(function (){
+			.finally(function () {
 				// typical finally
 			});
 	});
@@ -97,11 +103,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposableImport);
 }
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
 
 function getMainSection(html: string): string {
 	let titleSearchStart = html.search("algorithm-title\">");
-	html = html.substring(titleSearchStart+17);
+	html = html.substring(titleSearchStart + 17);
 	title = html.substring(0, html.search("</li>"));
 	let headSearch = "<div class=\"markdown solarized-dark\">";
 	let guideSectionStart = html.search(headSearch);
@@ -110,7 +116,7 @@ function getMainSection(html: string): string {
 	return html.substring(guideSectionStart + headSearch.length, guideSectionEnd);
 }
 
-function extractTC(mainSection: String[] ): Problem {
+function extractTC(mainSection: String[]): Problem {
 	// 일관성 없게 title 은 전역변수로 선언해버리기~
 	let desc = "";
 	let limit = "";
@@ -126,37 +132,35 @@ function extractTC(mainSection: String[] ): Problem {
 	}
 	trimUntil(mainSection, "th");
 	while (checkFirstTag(mainSection) === "th") {
-		tcHeader.push(getInnerText(mainSection, "th") );
+		tcHeader.push(getInnerText(mainSection, "th"));
 	}
 	trimUntil(mainSection, "td");
 	let checkTableTag = checkFirstTag(mainSection);
-	while ( checkTableTag === "td" || checkTableTag === "/tr") {
+	while (checkTableTag === "td" || checkTableTag === "/tr") {
 		let tcInnerText = removeTag(getInnerText(mainSection, "td"));
-		if(tcInnerText === "!%%EOC%%") {break;}
-		tcCase.push( tcInnerText );
+		if (tcInnerText === "!%%EOC%%") { break; }
+		tcCase.push(tcInnerText);
 		checkTableTag = checkFirstTag(mainSection);
-		
+
 	}
 	let problem = new Problem(title, desc, limit, tcHeader, tcCase);
 
 	return problem;
 }
 
-
-
 function getInnerText(mainSection: String[], tag: string): string {
 	// let mainSection = "<h5>입출력 예</h5>";
-	let locS = mainSection[0].search("<" + tag +">");
-	if (locS === -1) {return "!%%EOC%%";}
-	let locE = mainSection[0].search("</" + tag +">");
+	let locS = mainSection[0].search("<" + tag + ">");
+	if (locS === -1) { return "!%%EOC%%"; }
+	let locE = mainSection[0].search("</" + tag + ">");
 	let result = mainSection[0].substring(locS + tag.length + 2, locE);
 	mainSection[0] = mainSection[0].slice(locE + tag.length + 3);
 
-    return result;
+	return result;
 }
 
-function printIt(result: string){
-	vscode.window.showInformationMessage( result );
+function printIt(result: string) {
+	vscode.window.showInformationMessage(result);
 }
 
 function checkFirstTag(mainSection: String[]): string {
@@ -165,9 +169,60 @@ function checkFirstTag(mainSection: String[]): string {
 	return mainSection[0].substring(searchS + 1, searchE);
 }
 function trimUntil(mainSection: String[], tag: string) {
-	let locS = mainSection[0].search("<" + tag +">");
-	let locE = mainSection[0].search("</" + tag +">");
+	let locS = mainSection[0].search("<" + tag + ">");
+	let locE = mainSection[0].search("</" + tag + ">");
 	mainSection[0] = mainSection[0].slice(locS);
+}
+
+function buildCode(problem: Problem, language: string): string {
+	let codeResult = "";
+	switch (language) {
+		case "java":
+			codeResult = lang.javaCodeBuilder(problem);
+			return codeResult;
+		case "python":
+			codeResult = lang.pythonCodeBuilder(problem);
+			return codeResult;
+		case "javascript":
+			codeResult = lang.javascriptCodeBuilder(problem);
+			return codeResult;
+		case "customLang":
+			//customLang
+			return codeResult;
+		default:
+			codeResult = "langage not supported.";
+			return codeResult;
+	}
+}
+
+function codeToClipboard(str: string, language: string) {
+	let codeResult = "";
+	switch (language) {
+		case "java":
+			codeResult = lang.javaCodeExporter(str);
+			return codeResult;
+		case "python":
+			codeResult = lang.pythonCodeExporter(str);
+			return codeResult;
+		case "javascript":
+			codeResult = lang.javascriptCodeExporter(str);
+			return codeResult;
+		case "customLang":
+			//customLang
+			return codeResult;
+		default:
+			codeResult = vscode.window.activeTextEditor?.document.getText() as string;
+			return codeResult;
+	}
+}
+
+function removeTag(str: string): string {
+	let locS = str.search(">");
+	if (locS === -1) { return str; }
+	str = str.substring(locS + 1);
+	let locE = str.search("</");
+	str = str.substring(0, locE);
+	return str;
 }
 
 export class Problem {
@@ -177,56 +232,10 @@ export class Problem {
 	tcHeader: string[] = [];
 	tcCase: string[] = [];
 
-	constructor(title: string, limit: string, desc: string, tcHeader: string[], tcCase: string[]){
+	constructor(title: string, limit: string, desc: string, tcHeader: string[], tcCase: string[]) {
 		this.title = title;
 		this.desc = desc;
 		this.tcHeader = tcHeader;
 		this.tcCase = tcCase;
 	}
 }
-
-function buildCode(problem: Problem, language: string): string {
-	let codeResult = "";
-	switch (language) {
-		case "java":
-		codeResult = lang.javaCodeBuilder(problem, language);
-			return codeResult;
-		case "python":
-			//python
-			return codeResult;
-		case "customLang":
-			//customLang
-			return codeResult;
-		default:
-			codeResult = "error!";
-			return codeResult;
-	}	
-}
-
-function codeToClipboard(str: string, language: string) {
-	let codeResult = "";
-	switch (language) {
-		case "java":
-		codeResult = lang.javaCodeExporter(str);
-			return codeResult;
-		case "python":
-			//python
-			return codeResult;
-		case "customLang":
-			//customLang
-			return codeResult;
-		default:
-			codeResult = "error!";
-			return codeResult;
-	}	
-}
-
-function removeTag(str: string): string {
-	let locS = str.search(">");
-	if(locS === -1) {return str;}
-	str = str.substring(locS+1);
-	let locE = str.search("</");
-	str = str.substring(0, locE);
-	return str;
-}
-
