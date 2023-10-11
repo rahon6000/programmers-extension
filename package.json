@@ -3,6 +3,7 @@
   "displayName": "Programmers Extension",
   "description": "VScode extension for easy import&export for Programmers code test.",
   "icon": "resources/icon.png",
+  "publisher": "rahon6000",
   "author": {
     "name": "Taekhyeon Lee",
     "email": "rahon6000@gmail.com",
