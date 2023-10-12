@@ -222,6 +222,7 @@ function removeTag(str: string): string {
 	str = str.substring(locS + 1);
 	let locE = str.search("</");
 	str = str.substring(0, locE);
+	str = str.replaceAll("&quot;","\"");
 	return str;
 }
 

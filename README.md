@@ -68,6 +68,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 - Initial release
 
+### 1.0.1
+
+- fix error for importing string tast case.
+
 ## GitHub repository
 
 [github source code](https://github.com/rahon6000/programmers-extension)
