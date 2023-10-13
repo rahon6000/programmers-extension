@@ -12,3 +12,5 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [1.0.1] - 2023-10-12
 - fix error for importing string tast case.
 
+## [1.0.2] - 2023-10-13
+- fix error (importing java code for array answer)

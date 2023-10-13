@@ -40,10 +40,10 @@ const javaCodeBuilder = (problem: Problem): string => {
         // for loop starts
         outputIter +=
             `System.out.print("[");
-        for( `+ outputType.split("[")[0] + ` i : output ){\n`;
+        for( int i = 0; i < output.length; i++){\n`;
         for (let i = 0; i < outputDimension; i++) {  // For loop for array answer ##########
             outputIter +=
-                `            System.out.print(output);
+                `            System.out.print(output[i]);
             if ( i == (output.length-1)) break;
             else System.out.print(", ");\n`;
         }                                           // For loop for array answer ##########

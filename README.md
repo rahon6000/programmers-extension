@@ -47,21 +47,6 @@ VScode extension for easy import&export for [Programmers](https://school.program
 
 No other extension is required.
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
 ## Release Notes
 
 ### 1.0.0
@@ -71,6 +56,9 @@ Calling out known issues can help limit users opening duplicate issues against y
 ### 1.0.1
 
 - fix error for importing string tast case.
+
+## 1.0.2
+- fix error (importing java code for array answer)
 
 ## GitHub repository
 
