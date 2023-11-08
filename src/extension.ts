@@ -130,6 +130,8 @@ function extractTC(mainSection: String[]): Problem {
 	while (checkFirstTag(mainSection) === "li") {
 		limit += getInnerText(mainSection, "li");
 	}
+	getOnlyTable(mainSection);
+
 	trimUntil(mainSection, "th");
 	while (checkFirstTag(mainSection) === "th") {
 		tcHeader.push(getInnerText(mainSection, "th"));
@@ -226,6 +228,13 @@ function removeTag(str: string): string {
 	return str;
 }
 
+function getOnlyTable(mainSection: String[]) {
+	let tag = 'table';
+	let locS = mainSection[0].search("<" + tag + " class=\"table\">");
+	let locE = mainSection[0].search("</" + tag + ">");
+	mainSection[0] = mainSection[0].slice(locS, locE);
+}
+
 export class Problem {
 	title!: string;
 	desc!: string;
@@ -240,3 +249,4 @@ export class Problem {
 		this.tcCase = tcCase;
 	}
 }
+

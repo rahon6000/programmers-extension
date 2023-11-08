@@ -9,7 +9,7 @@
     "email": "rahon6000@gmail.com",
     "url": "https://blog.rahon.dev"
   },
-  "version": "1.0.1",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.83.0"
   },
